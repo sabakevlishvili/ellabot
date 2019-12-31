@@ -3,5 +3,17 @@
     "discord.js": "^11.5.1",
     "isomorphic-unfetch": "^3.0.0",
     "leaguejs": "^2.1.1"
-  }
+  },
+  "engines": {
+    "yarn": "1.17.3"
+  },
+  "scripts": {
+    "start": "node ellabot"
+  },
+  "name": "ellabot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/sabakevlishvili/ellabot.git",
+  "author": "<sabakevlishvili321@gmail.com>",
+  "license": "MIT"
 }
