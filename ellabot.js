@@ -1,12 +1,16 @@
 const Discord = require("discord.js");
 const { Attachment } = require("discord.js");
+const axios = require("axios");
 
 const client = new Discord.Client();
 
 process.env.LEAGUE_API_PLATFORM_ID = "euw1";
 
 const LeagueJS = require("leaguejs");
-const leagueJs = new LeagueJS("RGAPI-fe94ac57-9170-4eab-b2c2-653e5885aeba");
+const leagueJs = new LeagueJS("RGAPI-3442efd7-35e6-4939-bb5b-8a79b4e8df06");
+
+const Jikan = require('jikan-node');
+const mal = new Jikan();
 
 function ChIDToName($id) {
   switch ($id) {
@@ -409,18 +413,43 @@ function ChIDToName($id) {
     case 81:
       return "Ezreal";
       break;
+    case 523:
+      return "Aphelios";
+      break;
+    case 350:
+      return "Yuumi";
+      break;
+    case 235:
+      return "Senna";
+      break;
+    case 875:
+      return "Sett";
+      break;
+    case 145:
+      return "Kai'sa";
+      break;
+
+    case 498:
+      return "Xayah";
+      break;
+
+    case 497:
+      return "Rakan";
+      break;
   }
 }
 
-getMastery = async sumName => {
+const frogArray = ["1", "2", "3"];
+
+getMastery = async (sumName) => {
   let sumID = leagueJs.Summoner.gettingByName(sumName)
-    .then(data => {
+    .then((data) => {
       "use strict";
-      console.log(data);
+      console.log(data, "summoner data");
       //   summoner = data;
       return data.id;
     })
-    .catch(err => {
+    .catch((err) => {
       "use strict";
       console.log(err);
     });
@@ -428,15 +457,18 @@ getMastery = async sumName => {
   // console.log (await sumID, "sdasdnajsdbnasndioasdnioasdbnaoisdboi")
 
   let summoner = leagueJs.ChampionMastery.gettingBySummoner(await sumID)
-    .then(data => {
+    .then((data) => {
       "use strict";
+
+      console.log(data, "mastery");
+
       // console.log(ChIDToName(data.championId), data);
       let summonerMastery = data;
 
       //   summoner = data;
       return summonerMastery;
     })
-    .catch(err => {
+    .catch((err) => {
       "use strict";
       console.log(err);
     });
@@ -444,16 +476,30 @@ getMastery = async sumName => {
   return await summoner;
 };
 
+console.log(client.channels["661564985935265802"]) 
+
 client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  console.log("dsandansdlasndl");
 });
 
-client.on("message", async msg => {
+client.on("message", async (msg) => {
+
+  
+  console.log(msg.author.username);
   let msgArray = msg.content.split(" ");
 
-  if (msgArray.length === 1 && msg.author.username !== "ellabot" && msg.author.username === "ellacxela") {
+  if (
+    msgArray.length === 1 &&
+    msg.author.username !== "ellabot" &&
+    msg.author.username === "ellacxela"
+  ) {
     msg.react("🤔");
-    msg.reply(msg.content + " ra aris?");
+    msg.reply("What is" + " " + msg.content + "?");
+  }
+
+  if (msg.author.username !== "ellabot" && msg.author.username === "mchigo13") {
+    msg.react("👎");
   }
 
   if (msgArray[0] === "ella" && msgArray[1] === "gafeede") {
@@ -463,9 +509,50 @@ client.on("message", async msg => {
     msg.channel.send(attachment);
   }
 
+  if (msgArray[0] === "ella" && msgArray[1] === "frog") {
+    const attachment = new Attachment(
+      `images/${frogArray[Math.floor(Math.random() * frogArray.length)]}.jpg`
+    );
+    msg.channel.send(attachment);
+  }
+
   if (msgArray[0] === "ella" && msgArray[1] === "cxela") {
     msg.react("🔥");
     msg.reply(":fire: :fire: :fire:");
+  }
+
+  if (msgArray[0] === "ella" && msgArray[1] === "anime" ) {
+    axios
+      .get(
+        `https://api.jikan.moe/v3/search/anime?q=${msgArray[2]}&page=1`
+      )
+      .then(function (response) {
+        // handle success
+
+        let result = response.data.results[0]
+        
+        msg.reply(`\n title: ${result.title}, \n airing: ${result.airing}, \n synopsis: ${result.synopsis}, \n type: ${result.type}, \n episodes: ${result.episodes}, \n score: ${result.score}`);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
+  }
+
+  console.log(msg.content);
+
+  if (msg.content === "ella how long is my schlong?") {
+    if (
+      msg.author.username === "Xalicha" ||
+      msg.author.username === "ellacxela"
+    ) {
+      msg.reply("2bjilion" + " inches");
+    } else {
+      msg.reply(Math.floor(Math.random() * 15) + " inches");
+    }
   }
 
   if (
@@ -475,26 +562,26 @@ client.on("message", async msg => {
   ) {
     let mastery = await getMastery(msgArray[2]);
 
-    mastery.sort(function(a, b) {
+    mastery.sort(function (a, b) {
       return b.championPoints - a.championPoints;
     });
-    
-    let i= 0
+
+    let i = 0;
     let slicedarray = mastery.slice(0, 5);
 
-  
-    slicedarray.forEach(champion => {
-      i++
+    slicedarray.forEach((champion) => {
+      i++;
       champion.championId = ChIDToName(champion.championId);
       console.log(champion);
-      console.log(i)
+      console.log(i);
 
       msg.reply(`
       ${i}. Champ: ${champion.championId}, Champion Level: ${champion.championLevel}, chest: ${champion.chestGranted}, mastery: ${champion.championPoints}`);
     });
-
-    
   }
 });
+
+
+
 
 client.login("NjYxNTYzMDk3Mjk0ODMxNjM1.XgtPGQ.GvAGlqifX89Jyuz1qKd-8ok2tgM");
